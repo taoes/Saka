@@ -1,14 +1,14 @@
 package com.zhoutao123.framework.saka.autoconfig;
 
+import com.zhoutao123.framework.saka.advice.ExceptionAdvice;
 import com.zhoutao123.framework.saka.entity.MetaMethod;
 import com.zhoutao123.framework.saka.entity.MetaMethodArray;
 import com.zhoutao123.framework.saka.listener.HandleSubscribeListener;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 /**
  * Saka客户端的实现
@@ -20,6 +20,8 @@ public class SakaSendClient implements ISakaClient {
 
   @Autowired(required = false)
   HandleSubscribeListener listener;
+
+  @Autowired public ExceptionAdvice exceptionAdvice;
 
   @Async
   @Override
@@ -56,7 +58,7 @@ public class SakaSendClient implements ISakaClient {
    * @param message
    * @return a bool reault,it express wether continue execute
    */
-  private boolean executeSubscribe(MetaMethod metaMethod, Object message) {
+  private boolean executeSubscribe(MetaMethod metaMethod, Object... message) {
     Method method = metaMethod.getMethod();
     Object instance = metaMethod.getInstance();
     boolean continueExecute = true;
@@ -72,8 +74,13 @@ public class SakaSendClient implements ISakaClient {
         listener.onSuccess(metaMethod, resultObject);
       }
     } catch (Exception e) {
+      // 执行事件Hook
       if (listener != null) {
         continueExecute = listener.onError(e);
+      }
+      // 进行统一异常处理
+      if (exceptionAdvice != null) {
+        exceptionAdvice.handleException(method, new RuntimeException(e));
       }
     }
     return continueExecute;

@@ -208,6 +208,40 @@ saka:
 + 执行Subscribe中出现了异常信息的时候，将执行```public boolean onError(Throwable)``` 您可以返回一个布尔类型的数据表示是否继续执行剩余的Subscribe，其中Throwable表示出现的异常信息
 
 
+## 设置统一异常处理
+Saka 提供了统一异常处理的机制，当消费者执行消息出现异常，则会执行异常处理，Saka 内置了一个默认的处理器，但是仅仅打印出系统的错误日志而已，如果不满足业务需要，可以通过继承
+`com.zhoutao123.framework.saka.advice.ExceptionAdvice`
+
+```java
+/** 统一异常处理接口 */
+public interface ExceptionAdvice {
+
+  /**
+   * 异常处理
+   *
+   * @param method 执行的方法名称
+   * @param e 发生的异常信息
+   */
+  void handleException(Method method, RuntimeException e);
+}
+```
+
+
+接口并注入Bean 到IOC容器即可。如
+
+```java
+@Bean
+public class DefaultExceptionAdvice implements ExceptionAdvice {
+
+  @Override
+  public void handleException(Method method, RuntimeException e) {
+    log.error("Saka执行事件{}出现错误", method.getName());
+    log.error("Saka 订阅事件执行出现异常", e);
+  }
+}
+
+```
+
 ## 关闭Saka
 
 在使用的过程中,可以通过配置动态的关闭Saka,重新启动应用，可以看到以下提示则说明关闭成功。
