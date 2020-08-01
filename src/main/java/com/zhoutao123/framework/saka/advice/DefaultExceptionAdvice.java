@@ -10,7 +10,7 @@ public class DefaultExceptionAdvice implements ExceptionAdvice {
 
   @Override
   public void handleException(Method method, RuntimeException e) {
-    log.error("Saka执行事件{}出现错误", method.getName());
+    log.error("Saka执行事件 {}出现错误", method.getName());
     log.error("Saka 订阅事件执行出现异常", e);
   }
 }

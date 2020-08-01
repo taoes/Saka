@@ -20,20 +20,12 @@ public class MetaMethodArray {
     metaMethods.add(metaMethod);
   }
 
-  /**
-   * 当前方法集合的size
-   *
-   * @return
-   */
+  /** 当前方法集合的size */
   public static int size() {
     return metaMethods.size();
   }
 
-  /**
-   * 当前的方法集合
-   *
-   * @return
-   */
+  /** 当前的方法集合 */
   public static boolean isEmpty() {
     return size() == 0;
   }
@@ -42,7 +34,7 @@ public class MetaMethodArray {
     return metaMethods;
   }
 
-  /** start sort with order(int) */
+  /** 方法按照Order进行排序 */
   public static void sort() {
     if (metaMethods != null) {
       metaMethods.sort(

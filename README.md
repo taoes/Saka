@@ -11,10 +11,10 @@
 您可以通过以下导航来在 语雀 中访问我的读书笔记，涵盖了技术、服务端开发与基础架构、闲谈杂记等多个项目：
 
 
-《[前端开发杂记](https://www.yuque.com/zhoutao123/front_end)》 
+《[前端开发杂记](https://www.yuque.com/zhoutao123/front_end)》
 《[设计模式](https://www.yuque.com/zhoutao123/design_pattern)》
 《[深入理解JVM虚拟机](https://www.yuque.com/zhoutao123/jvm)》
-《[Java 并发编程](https://www.yuque.com/zhoutao123/java_concurrent)》 
+《[Java 并发编程](https://www.yuque.com/zhoutao123/java_concurrent)》
 《[Netty入门与实战](https://www.yuque.com/zhoutao123/netty)》
 《[高性能MySQL](https://www.yuque.com/zhoutao123/mysql)》
 
@@ -32,11 +32,7 @@
 ## 使用方法
 
 #### 1、添加依赖
-**请等待上传到仓库**
 
-```xml
-暂未上传，敬请期待
-```
 
 #### 2、使用注解标注对象和执行器
 **(注意：目前仅支持最多无参接收或者一参接收，暂不支持多个参数接收消息)**

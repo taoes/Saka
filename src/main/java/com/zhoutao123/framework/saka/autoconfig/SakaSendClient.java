@@ -6,22 +6,19 @@ import com.zhoutao123.framework.saka.entity.MetaMethodArray;
 import com.zhoutao123.framework.saka.listener.HandleSubscribeListener;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 
-/**
- * Saka客户端的实现
- *
- * @author zhoutao123
- */
+/** Saka客户端的实现 */
 @Slf4j
 public class SakaSendClient implements ISakaClient {
 
   @Autowired(required = false)
-  HandleSubscribeListener listener;
+  private HandleSubscribeListener listener;
 
-  @Autowired public ExceptionAdvice exceptionAdvice;
+  @Autowired private ExceptionAdvice exceptionAdvice;
 
   @Async
   @Override
@@ -36,32 +33,22 @@ public class SakaSendClient implements ISakaClient {
     for (MetaMethod metaMethod : MetaMethodArray.getMetaMethods()) {
       if (message == null && metaMethod.getParamCount() == 0) {
         count++;
-        if (!executeSubscribe(metaMethod, null)) {
-          break;
-        }
+        executeSubscribe(metaMethod);
       } else if (message != null
           && metaMethod.getParamCount() == 1
           && metaMethod.getParamType()[0].equals(message.getClass())) {
         count++;
-        if (!executeSubscribe(metaMethod, message)) {
-          break;
-        }
+        // 执行方法
+        executeSubscribe(metaMethod, message);
       }
     }
-    log.info("Saka ------>  Saka has successfully sent {} times data.", count);
+    log.info("消息发送完成，发送次数:{}", count);
   }
 
-  /**
-   * execute Subscribe with metaMethod and Message
-   *
-   * @param metaMethod
-   * @param message
-   * @return a bool reault,it express wether continue execute
-   */
-  private boolean executeSubscribe(MetaMethod metaMethod, Object... message) {
+  /** 执行 */
+  private void executeSubscribe(MetaMethod metaMethod, Object... message) {
     Method method = metaMethod.getMethod();
     Object instance = metaMethod.getInstance();
-    boolean continueExecute = true;
     Object resultObject = null;
     try {
       if (message == null) {
@@ -70,19 +57,14 @@ public class SakaSendClient implements ISakaClient {
         resultObject = method.invoke(instance, message);
       }
       if (listener != null) {
-        // FIXME 此处需要修改
         listener.onSuccess(metaMethod, resultObject);
       }
     } catch (Exception e) {
-      // 执行事件Hook
-      if (listener != null) {
-        continueExecute = listener.onError(e);
-      }
+      Optional.of(listener).ifPresent(listener -> listener.onError(e));
       // 进行统一异常处理
       if (exceptionAdvice != null) {
         exceptionAdvice.handleException(method, new RuntimeException(e));
       }
     }
-    return continueExecute;
   }
 }

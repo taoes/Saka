@@ -5,22 +5,21 @@ import lombok.Data;
 
 import java.lang.reflect.Method;
 
-/**
- * 元数据
- *
- *
- * @author zhoutao123
- */
+/** 元数据 */
 @Data
 public class MetaMethod {
 
+  // 方法所在的实例
   private Object instance;
 
+  // 方法
   private Method method;
 
+  // 方法的参数数量
   private int paramCount;
 
-  private Class[] paramType;
+  // 方法参数类型
+  private Class<?>[] paramType;
 
   private int order;
 
@@ -32,22 +31,14 @@ public class MetaMethod {
     this.order = method.getAnnotation(SakaSubscribe.class).order();
   }
 
-  /**
-   * 方法是否允许访问
-   *
-   * @return
-   */
+  /** 方法是否允许访问 */
   public boolean allowAccess() {
     return method.isAccessible();
   }
 
-  /**
-   * 是否打印日志
-   *
-   * @return
-   */
+  /** 是否打印日志 */
   public boolean printLog() {
     SakaSubscribe subscribe = method.getAnnotation(SakaSubscribe.class);
-    return subscribe == null ? false : subscribe.debug();
+    return subscribe != null && subscribe.debug();
   }
 }

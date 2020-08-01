@@ -7,36 +7,38 @@ import com.zhoutao123.framework.saka.entity.MetaMethod;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 
 import java.lang.reflect.Method;
 
-/**
- * Saka客户端信息
- *
- * @author zhoutao123
- */
+/** Saka客户端信息 */
 @Data
 @Slf4j
-@NoArgsConstructor
 @ConditionalOnBean(annotation = SakaService.class)
 @EnableConfigurationProperties(SakaProperties.class)
-public class SakaInit {
+public class SakaInit implements ApplicationContextAware {
 
-  @Autowired ApplicationContext applicationContext;
+  private ApplicationContext applicationContext;
 
-  @Autowired SakaProperties sakaProperties;
+  private SakaProperties sakaProperties;
+
+  public SakaInit(SakaProperties sakaProperties) {
+    this.sakaProperties = sakaProperties;
+  }
 
   @Bean
   @ConditionalOnMissingBean(SakaSendClient.class)
   public SakaSendClient serverBuilderConfigurer() {
     if (!sakaProperties.isEnable()) {
-      log.info("Saka ------> Don't open the Saka, please check the configuration information");
+      log.warn("服务未启动");
+      return new SakaSendClient();
     }
     // 获取包含Bean
     String[] beanDefinitionNames = applicationContext.getBeanNamesForAnnotation(SakaService.class);
@@ -52,16 +54,18 @@ public class SakaInit {
         method.setAccessible(true);
         MetaMethod metaMethod = new MetaMethod(bean, method);
         MetaMethodArray.add(metaMethod);
-        log.info(
-            "Saka ------> Add a methods {}({}) to Saka",
-            method.getName(),
-            metaMethod.getParamCount());
+        log.info("新增方法:{}", method.getName());
       }
     }
-    // if order exexuct is open,and sort metaMethod
+
     if (sakaProperties.isSequenceExecute()) {
       MetaMethodArray.sort();
     }
     return new SakaSendClient();
+  }
+
+  @Override
+  public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    this.applicationContext = applicationContext;
   }
 }
